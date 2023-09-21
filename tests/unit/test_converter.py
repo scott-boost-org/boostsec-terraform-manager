@@ -22,8 +22,8 @@ test_data = [("../data/test.tfvars", TestModel), ("../data/auth0.tfvars", Tfvars
 @pytest.mark.parametrize(("file_path", "model"), test_data)
 def test_convert_pydantic_to_hcl(file_path: str, model: BaseModel) -> None:
     """Test."""
-    tfvars_hcl = hcl.loads(Path("../data/test.tfvars").read_text())
-    variables = TestModel.parse_raw(hcl.dumps(tfvars_hcl))
+    tfvars_hcl = hcl.loads(Path(file_path).read_text())
+    variables = model.parse_raw(hcl.dumps(tfvars_hcl))
 
     hcl_result = convert_pydantic_to_hcl(variables)
 
