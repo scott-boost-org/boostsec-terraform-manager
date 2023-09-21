@@ -1,0 +1,17 @@
+{
+  "template": "git@github.com:boostsecurityio/boostsec-project-template.git",
+  "commit": "e6643b8d77575a21836e6d8da62ed109a9716c9b",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "project_slug": "boostsec-terraform-manager",
+      "project_description": "Do great things!",
+      "namespace": "boostsec",
+      "module": "terraform_manager",
+      "use_argocd": "y",
+      "use_docker": "y",
+      "_template": "git@github.com:boostsecurityio/boostsec-project-template.git"
+    }
+  },
+  "directory": null
+}
