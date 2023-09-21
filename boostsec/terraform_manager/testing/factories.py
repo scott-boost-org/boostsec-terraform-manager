@@ -2,7 +2,7 @@
 from boostsec.common.testing.factories import EmptyDictFactory, EmptyListFactory
 from pydantic_factories import ModelFactory, Use
 
-from boostsec.terraform_manager.models import Tfvars, Organization
+from boostsec.terraform_manager.models import Organization, Tfvars
 
 
 class TfvarsFactory(ModelFactory[Tfvars]):
@@ -18,7 +18,7 @@ class TfvarsFactory(ModelFactory[Tfvars]):
 
 
 class OrganizationFactory(ModelFactory[Organization]):
-    """"""
+    """Factory for Organization."""
 
     __model__ = Organization
 

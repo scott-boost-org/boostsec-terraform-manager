@@ -5,8 +5,8 @@ import hcl  # type: ignore[import]
 import pytest
 from pydantic import BaseModel
 
-from boostsec.terraform_manager.converter import convert_pydantic_to_hcl
 from boostsec.terraform_manager.models import Branding, Tfvars
+from boostsec.terraform_manager.utils.converter import convert_pydantic_to_hcl
 
 
 class TestModel(BaseModel):

@@ -18,6 +18,9 @@ typer = "^0.9.0"
 testing = [
 ]
 
+[tool.poetry.scripts]
+tf-mng = "boostsec.terraform_manager.main:app"
+
 [tool.poetry.group.dev.dependencies]
 ## Automatically generated dependencies. DO NOT edit between these lines. ##
 black = "^23.3.0"
