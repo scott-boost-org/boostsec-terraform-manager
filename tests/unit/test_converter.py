@@ -16,7 +16,10 @@ class TestModel(BaseModel):
 
 
 # The list of parameters
-test_data = [("../data/test.tfvars", TestModel), ("../data/auth0.tfvars", Tfvars)]
+test_data = [
+    (Path(__file__).parent.parent / "data/test.tfvars", TestModel),
+    (Path(__file__).parent.parent / "data/auth0.tfvars", Tfvars),
+]
 
 
 @pytest.mark.parametrize(("file_path", "model"), test_data)

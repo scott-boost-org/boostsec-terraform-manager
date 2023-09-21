@@ -28,6 +28,7 @@ pytest = "^7.0.1"
 pytest-cov = "^4.0.0"
 ruff = "^0.0.281"
 ## Automatically generated dependencies. DO NOT edit between these lines. ##
+pydantic-factories = "^1.5.2"
 
 [tool.black]
 target-version = ['py310']

@@ -38,5 +38,5 @@ def process_value(value: str | bool | list[Any] | dict[str, Any]) -> str:
             if formatted_dict:
                 return "{\n  " + "\n  ".join(formatted_dict) + "\n}"
             return "{}"
-        case _:
-            return f'"{value}"'
+        case _:  # pragma: no cover
+            raise TypeError()
