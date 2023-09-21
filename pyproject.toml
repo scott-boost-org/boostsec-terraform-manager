@@ -11,6 +11,7 @@ include = ["boostsec/terraform_manager/py.typed"]
 python = "~3.10"
 boostsec-common = {git = "git@github.com:boostsecurityio/boostsec-common.git", rev = "main"}
 ## Automatically generated dependencies. DO NOT edit between these lines. ##
+pyhcl = "^0.4.5"
 
 [tool.poetry.extras]
 testing = [
