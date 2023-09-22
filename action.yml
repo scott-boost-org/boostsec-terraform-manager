@@ -1,10 +1,10 @@
 name: 'Terraform Manager Action'
 description: 'Action using Typer CLI'
 inputs:
-  name:
-    description: 'Version of typer'
-    required: false
-    default: '0.0.2'
+  tf_mng_command:
+    description: 'Command to run with tf-mng'
+    required: true
+    default: 'version'
 runs:
   using: 'composite'
   steps:
@@ -12,5 +12,5 @@ runs:
         pip install poetry
         cd ${{ github.action_path }}
         poetry install
-        poetry run tf-mng version
+        poetry run tf-mng ${{ inputs.tf_mng_command }}
       shell: bash
