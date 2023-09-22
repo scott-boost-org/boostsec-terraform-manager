@@ -10,6 +10,7 @@ runs:
   steps:
     - run: |
         pip install poetry
-        poetry install --directory=${{ github.action_path }}
+        cd ${{ github.action_path }}
+        poetry install
         poetry run tf-mng version
       shell: bash
