@@ -1,0 +1,12 @@
+name: 'Terraform Manager Action'
+description: 'Action using Typer CLI'
+inputs:
+  name:
+    description: 'Version of typer'
+    required: false
+    default: '0.0.2'
+runs:
+  using: 'composite'
+  steps:
+    - run: ${{ github.action_path }}/boostsec/terraform_manager/main.py version"
+      shell: python
