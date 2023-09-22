@@ -8,5 +8,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - run: ${{ github.action_path }}/boostsec/terraform_manager/main.py version
-      shell: python
+   run: |
+    python /home/runner/work/_actions/scott-boost-org/boostsec-terraform-manager/boostsec/terraform_manager/main.py version
+
