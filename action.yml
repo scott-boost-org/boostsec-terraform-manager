@@ -9,5 +9,5 @@ runs:
   using: 'composite'
   steps:
     - run: |
-        pip install poetry && poetry install --directory=${{ github.action_path}} && poetry run ${{ github.action_path }}/boostsec/terraform_manager/main.py version
+        pip install poetry && poetry install --directory=${{ github.action_path}} && poetry run --directory=${{ github.action_path }} ${{ github.action_path }}/boostsec/terraform_manager/main.py version
       shell: bash
