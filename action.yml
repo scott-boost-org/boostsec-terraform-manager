@@ -11,6 +11,6 @@ runs:
     - run: |
         pip install poetry
         cd ${{ github.action_path }}
-        poetry install
+        poetry install --
         poetry run tf-mng ${{ inputs.tf_mng_command }}
       shell: bash

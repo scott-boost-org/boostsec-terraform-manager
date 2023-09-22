@@ -1,11 +1,10 @@
 """Organization."""
-from typing import Optional, Any, TypeVar
+from typing import Any, Optional, TypeVar
 from uuid import uuid4
 
 from pydantic import BaseModel
 
 from boostsec.terraform_manager.models import Branding, Organization, Tfvars
-
 
 T = TypeVar("T", bound=BaseModel)
 
