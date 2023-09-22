@@ -9,5 +9,7 @@ runs:
   using: 'composite'
   steps:
     - run: |
-        pip install poetry && poetry install --directory=${{ github.action_path}} && tf-mng version
+        pip install poetry
+        poetry install --directory=${{ github.action_path }}
+        poetry run tf-mng version
       shell: bash
