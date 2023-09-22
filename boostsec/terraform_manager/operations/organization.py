@@ -1,10 +1,19 @@
 """Organization."""
-from typing import Optional
+from typing import Optional, Any, TypeVar
 from uuid import uuid4
 
-from boostsec.common.pydantic import evolve
+from pydantic import BaseModel
 
 from boostsec.terraform_manager.models import Branding, Organization, Tfvars
+
+
+T = TypeVar("T", bound=BaseModel)
+
+
+def evolve(obj: T, **overrides: Any) -> T:
+    """Create a new object overriding specified field, use to evolve a frozen obj."""
+    new_attributes: dict[str, Any] = {**dict(obj), **overrides}
+    return obj.__class__(**new_attributes)
 
 
 def add_organization(

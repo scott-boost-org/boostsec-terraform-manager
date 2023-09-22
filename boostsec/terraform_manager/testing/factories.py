@@ -1,8 +1,13 @@
 """Model Factories."""
-from boostsec.common.testing.factories import EmptyDictFactory, EmptyListFactory
+from typing import Any
+
 from pydantic_factories import ModelFactory, Use
 
 from boostsec.terraform_manager.models import Organization, Tfvars
+
+
+EmptyDictFactory: Use[Any, dict[Any, Any]] = Use(lambda: {})
+EmptyListFactory: Use[Any, list[Any]] = Use(lambda: [])
 
 
 class TfvarsFactory(ModelFactory[Tfvars]):
