@@ -12,7 +12,7 @@ runs:
       id: cache-terraform
       uses: actions/cache@v2
       with:
-        path: ~/.terraform-bin/
+        path: ~/.cache/terraform/
         key: terraform-${{ runner.os }}
 
     - name: Install Terraform
@@ -21,14 +21,14 @@ runs:
         curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
         sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
         sudo apt-get update && sudo apt-get install terraform
-        mkdir -p ~/.terraform-bin
-        sudo cp /usr/bin/terraform ~/.terraform-bin/terraform
+        mkdir -p ~/.cache/terraform/
+        sudo cp /usr/bin/terraform ~/.cache/terraform/terraform
       shell: bash
 
     - name: Restore Cached Terraform
       if: steps.cache-terraform.outputs.cache-hit == 'true'
       run: |
-        sudo cp ~/.terraform-bin/terraform /usr/bin/
+        sudo cp ~/.cache/terraform/terraform /usr/bin/
       shell: bash
 
     - name: Cache Poetry Dependencies

@@ -54,9 +54,9 @@ def create(
 
     create_pr(
         file_content=formatted_result,
-        branch_name="test",
-        commit_msg="Formatted test",
-        pr_title="It worked!",
+        branch_name=f"create-{workspace}-{org_name}",
+        commit_msg=f"Add {display_name} to {workspace} environment",
+        pr_title=f"[{workspace.upper()}] Create {display_name}",
         token=gh_api_token,
         workspace=workspace,
     )
