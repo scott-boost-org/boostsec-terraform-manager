@@ -76,8 +76,7 @@ async def slash_command(
     repo = _get_repo(settings.github_token, settings.repo_full_name)
     workflow = repo.get_workflow(settings.workflow_id)
     urlstring = (await request.body()).decode()
-    # inputs = to_inputs(SlashCommandPayload.from_urlstring(urlstring).text)
-    inputs = {"tf_mng_command": 'create scott-test "Scott Test" dev'}
+    inputs = to_inputs(SlashCommandPayload.from_urlstring(urlstring).text)
     workflow.create_dispatch(
         repo.default_branch,
         inputs,
