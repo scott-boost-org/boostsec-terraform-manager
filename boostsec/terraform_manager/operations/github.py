@@ -20,7 +20,7 @@ AUTH0_PATH = "workspaces/{workspace}/02-auth0/terraform.auto.tfvars"
 
 def _get_repo(token: str) -> Repository:
     client = Github(token)
-    return client.get_repo("boostsecurityio/terraform-releases")
+    return client.get_repo("scott-boost-org/terraform-releases")
 
 
 def _create_branch(repository: Repository, branch_name: str) -> None:
