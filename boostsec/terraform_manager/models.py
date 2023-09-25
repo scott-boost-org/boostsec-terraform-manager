@@ -50,4 +50,8 @@ class Tfvars(BaseModel):
     allowed_web_origins: list[str]
     initiate_login_uri: str
     admin_dashboard: AdminDashboard
+    enable_tenant_custom_domain: Optional[bool] = None
+    tenant_custom_domain: Optional[str] = None
+    email_provider: Optional[str] = None
+    email_from_address: Optional[str] = None
     organizations: dict[str, Organization]
