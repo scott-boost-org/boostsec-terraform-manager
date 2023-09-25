@@ -8,16 +8,33 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: Cache Terraform
+      id: cache-terraform
+      uses: actions/cache@v2
+      with:
+        path: /usr/bin/terraform
+        key: terraform-${{ runner.os }}-${{ hashFiles('**.tf') }}
+
     - name: Install Terraform
+      if: steps.cache-terraform.outputs.cache-hit != 'true'
       run: |
         curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
         sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
         sudo apt-get update && sudo apt-get install terraform
       shell: bash
 
+    - name: Cache Poetry Dependencies
+      id: cache-poetry
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pypoetry
+        key: poetry-${{ runner.os }}-${{ hashFiles('**/pyproject.toml') }}
+
     - run: |
         pip install poetry
         cd ${{ github.action_path }}
-        poetry install --
+        if [ "${{ steps.cache-poetry.outputs.cache-hit }}" != "true" ]; then
+          poetry install
+        fi
         poetry run tf-mng ${{ inputs.tf_mng_command }}
       shell: bash
