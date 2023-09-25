@@ -49,6 +49,8 @@ def add_feature_flag_for_all_orgs(feature_flag: str, model: Tfvars) -> Tfvars:
     for org_name in orgs:
         orgs[org_name] = evolve(
             orgs[org_name],
-            boost_org_features=[*orgs[org_name].boost_org_features, feature_flag],
+            boost_org_features=[*orgs[org_name].boost_org_features, feature_flag]
+            if feature_flag not in orgs[org_name].boost_org_features
+            else orgs[org_name].boost_org_features,
         )
     return evolve(model, organizations=orgs)
