@@ -10,7 +10,10 @@ from boostsec.terraform_manager.operations.github import (
     Workspace,
     create_pr,
 )
-from boostsec.terraform_manager.operations.organization import add_organization
+from boostsec.terraform_manager.operations.organization import (
+    add_feature_flag_for_all_orgs,
+    add_organization,
+)
 from boostsec.terraform_manager.utils.converter import (
     convert_pydantic_to_hcl,
     format_terraform_code,
@@ -63,15 +66,41 @@ def create(
 
 
 @app.command()
-def delete() -> None:
-    """Delete."""
-    typer.echo("Delete an org")
+def update(
+    feature_flag: str,
+    workspace: Workspace,
+    location: str = terraform_location,
+    gh_api_token: str = github_token_env,
+) -> None:
+    """Update."""
+    tfvars_hcl = hcl.loads(
+        Path(f"{location}/{AUTH0_PATH.format(workspace=workspace)}").read_text()
+    )
+    variables = Tfvars.parse_raw(hcl.dumps(tfvars_hcl))
+
+    new_org_vars = add_feature_flag_for_all_orgs(
+        feature_flag,
+        variables,
+    )
+
+    hcl_result = convert_pydantic_to_hcl(new_org_vars)
+
+    formatted_result = format_terraform_code(hcl_result)
+
+    create_pr(
+        file_content=formatted_result,
+        branch_name=f"update-{workspace}-{feature_flag}",
+        commit_msg=f"Add {feature_flag} to all orgs in the {workspace} environment",
+        pr_title=f"[{workspace.upper()}] Update org with feature flag: {feature_flag}",
+        token=gh_api_token,
+        workspace=workspace,
+    )
 
 
 @app.command()
-def update() -> None:
-    """Update."""
-    typer.echo("Update an org")
+def delete() -> None:
+    """Delete."""
+    typer.echo("Delete an org")
 
 
 if __name__ == "__main__":  # pragma: no cover
