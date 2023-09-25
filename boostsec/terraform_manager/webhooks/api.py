@@ -63,7 +63,7 @@ def to_inputs(text: str) -> dict[str, Any]:
     print(text)
     for arg in shlex.split(urllib.parse.unquote(text)):
         name, value = arg.split("=")
-        result[name] = value
+        result[name] = value.replace("+", " ")
     return result
 
 
