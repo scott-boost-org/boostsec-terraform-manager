@@ -5,9 +5,20 @@ inputs:
     description: 'Command to run with tf-mng'
     required: true
     default: 'version'
+  terraform_version:
+    description: 'Version of Terraform to install'
+    required: false
+    default: 'latest'
 runs:
   using: 'composite'
   steps:
+    - name: Install Terraform
+      run: |
+        curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+        sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+        sudo apt-get update && sudo apt-get install terraform=${{ inputs.terraform_version }}
+      shell: bash
+
     - run: |
         pip install poetry
         cd ${{ github.action_path }}

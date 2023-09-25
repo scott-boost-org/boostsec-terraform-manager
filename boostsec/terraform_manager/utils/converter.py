@@ -1,4 +1,6 @@
 """Converters for Terraform HCL."""
+import subprocess
+import tempfile
 from typing import Any
 
 from pydantic import BaseModel
@@ -40,3 +42,27 @@ def process_value(value: str | bool | list[Any] | dict[str, Any]) -> str:
             return "{}"
         case _:  # pragma: no cover
             raise TypeError()
+
+
+def format_terraform_code(tf_code: str) -> str:
+    """Format Terraform code using terraform fmt."""
+    with tempfile.NamedTemporaryFile(
+        mode="w+t", suffix=".tfvars", delete=True
+    ) as tmpfile:
+        tmpfile.write(tf_code)
+        tmpfile.flush()  # Ensure the data is written to disk.
+
+        try:
+            # Run terraform fmt on the temporary file.
+            subprocess.run(
+                ["terraform", "fmt", tmpfile.name],  # noqa: S603,S607
+                check=True,
+            )
+
+            # Move the cursor to the beginning of the file and read its content.
+            tmpfile.seek(0)
+            formatted_code = tmpfile.read()
+            return f"{formatted_code}\n"
+
+        except subprocess.CalledProcessError:
+            return tf_code
