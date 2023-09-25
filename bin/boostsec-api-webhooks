@@ -1,0 +1,9 @@
+#!/bin/sh
+
+export UVICORN_HOST=${UVICORN_HOST:-0.0.0.0}
+export UVICORN_PORT=${UVICORN_PORT:-8000}
+export UVICORN_LOG_LEVEL=${UVICORN_LOG_LEVEL:-CRITICAL}
+export UVICORN_NO_ACCESS_LOG=${UVICORN_NO_ACCESS_LOG:-true}
+export WEB_CONCURRENCY=${WEB_CONCURRENCY:-2}
+
+exec uvicorn --factory boostsec.terraform_manager.webhooks.api:main
