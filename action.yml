@@ -31,13 +31,6 @@ runs:
         sudo cp ~/.terraform-bin/terraform /usr/bin/
       shell: bash
 
-    - name: Cache pip packages
-      id: cache-pip
-      uses: actions/cache@v2
-      with:
-        path: ~/.cache/pip
-        key: pip-${{ runner.os }}
-
     - name: Cache Poetry Dependencies
       id: cache-poetry
       uses: actions/cache@v2
@@ -46,9 +39,7 @@ runs:
         key: poetry-${{ runner.os }}-${{ hashFiles('**/pyproject.toml') }}
 
     - run: |
-        if [ "${{ steps.cache-pip.outputs.cache-hit }}" != "true" ]; then
-          pip install poetry
-        fi
+        pip install poetry
         cd ${{ github.action_path }}
         if [ "${{ steps.cache-poetry.outputs.cache-hit }}" != "true" ]; then
           poetry install
