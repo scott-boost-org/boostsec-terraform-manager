@@ -1,5 +1,4 @@
 """Entrypoint."""
-import os
 from pathlib import Path
 
 import hcl  # type: ignore
@@ -20,6 +19,7 @@ from boostsec.terraform_manager.utils.converter import (
 app = typer.Typer()
 
 github_token_env = typer.Argument("None", envvar=["GITHUB_TOKEN"])
+terraform_location = typer.Argument("None", envvar=["GITHUB_WORKSPACE"])
 
 
 @app.command()
@@ -33,11 +33,12 @@ def create(
     org_name: str,
     display_name: str,
     workspace: Workspace,
+    location: str = terraform_location,
     gh_api_token: str = github_token_env,
 ) -> None:
     """Create."""
     tfvars_hcl = hcl.loads(
-        Path(f"{os.getcwd()}/{AUTH0_PATH.format(workspace=workspace)}").read_text()
+        Path(f"{location}/{AUTH0_PATH.format(workspace=workspace)}").read_text()
     )
     variables = Tfvars.parse_raw(hcl.dumps(tfvars_hcl))
 
