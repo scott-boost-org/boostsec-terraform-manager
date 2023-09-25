@@ -13,7 +13,7 @@ runs:
       uses: actions/cache@v2
       with:
         path: ~/.terraform-bin/
-        key: terraform-${{ runner.os }}-${{ hashFiles('**.tf') }}
+        key: terraform-${{ runner.os }}
 
     - name: Install Terraform
       if: steps.cache-terraform.outputs.cache-hit != 'true'
@@ -21,6 +21,7 @@ runs:
         curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
         sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
         sudo apt-get update && sudo apt-get install terraform
+        sudo cp /usr/bin/terraform ~/.terraform-bin/terraform
       shell: bash
 
     - name: Restore Cached Terraform
