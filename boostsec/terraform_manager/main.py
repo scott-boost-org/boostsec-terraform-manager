@@ -11,7 +11,7 @@ from boostsec.terraform_manager.operations.github import (
     create_pr,
 )
 from boostsec.terraform_manager.operations.organization import (
-    add_feature_flag_for_all_orgs,
+    add_feature_flag_for_orgs,
     add_organization,
 )
 from boostsec.terraform_manager.utils.converter import (
@@ -21,6 +21,7 @@ from boostsec.terraform_manager.utils.converter import (
 
 app = typer.Typer()
 
+list_option = typer.Option("", help="List of orgs to update separated by comma")
 github_token_env = typer.Argument("None", envvar=["GITHUB_TOKEN"])
 terraform_location = typer.Argument("None", envvar=["GITHUB_WORKSPACE"])
 
@@ -69,19 +70,19 @@ def create(
 def update(
     feature_flag: str,
     workspace: Workspace,
+    orgs: str = list_option,
     location: str = terraform_location,
     gh_api_token: str = github_token_env,
 ) -> None:
     """Update."""
+    org_list = [org.strip() for org in orgs.split(",") if org]
+
     tfvars_hcl = hcl.loads(
         Path(f"{location}/{AUTH0_PATH.format(workspace=workspace)}").read_text()
     )
     variables = Tfvars.parse_raw(hcl.dumps(tfvars_hcl))
 
-    new_org_vars = add_feature_flag_for_all_orgs(
-        feature_flag,
-        variables,
-    )
+    new_org_vars = add_feature_flag_for_orgs(feature_flag, variables, orgs=org_list)
 
     hcl_result = convert_pydantic_to_hcl(new_org_vars)
 

@@ -6,7 +6,7 @@ from boostsec.terraform_manager.models import (
     Tfvars,
 )
 from boostsec.terraform_manager.operations.organization import (
-    add_feature_flag_for_all_orgs,
+    add_feature_flag_for_orgs,
     add_organization,
 )
 from boostsec.terraform_manager.testing.factories import (
@@ -79,7 +79,7 @@ def test_add_feature_flag_for_all_orgs(faker: Faker) -> None:
     }
     feature_flag = faker.pystr()
     model: Tfvars = TfvarsFactory.build(organizations=before_orgs)
-    new_model = add_feature_flag_for_all_orgs(feature_flag=feature_flag, model=model)
+    new_model = add_feature_flag_for_orgs(feature_flag=feature_flag, model=model)
     assert len(new_model.organizations) == 2
     assert new_model.organizations[before_org_names[0]].boost_org_features == [
         *before_features[0],

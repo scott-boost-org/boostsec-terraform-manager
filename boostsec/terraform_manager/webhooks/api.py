@@ -92,7 +92,7 @@ def _build_response(
 
 
 @router.post("/terraform-manager-webhooks/slash-command")
-async def slash_command(
+async def slash_command(  # noqa: C901
     request: Request,
 ) -> dict[str, Any]:
     """Handle slash command webhook from slack."""

@@ -43,14 +43,18 @@ def add_organization(
     )
 
 
-def add_feature_flag_for_all_orgs(feature_flag: str, model: Tfvars) -> Tfvars:
+def add_feature_flag_for_orgs(
+    feature_flag: str, model: Tfvars, orgs: Optional[list[str]] = None
+) -> Tfvars:
     """Add feature flag to all organizations."""
-    orgs: dict[str, Organization] = {**model.organizations}
-    for org_name in orgs:
-        orgs[org_name] = evolve(
-            orgs[org_name],
-            boost_org_features=[*orgs[org_name].boost_org_features, feature_flag]
-            if feature_flag not in orgs[org_name].boost_org_features
-            else orgs[org_name].boost_org_features,
+    org_mapping: dict[str, Organization] = {**model.organizations}
+    for org_name in org_mapping:
+        if orgs and org_name not in orgs:
+            continue
+        org_mapping[org_name] = evolve(
+            org_mapping[org_name],
+            boost_org_features=[*org_mapping[org_name].boost_org_features, feature_flag]
+            if feature_flag not in org_mapping[org_name].boost_org_features
+            else org_mapping[org_name].boost_org_features,
         )
-    return evolve(model, organizations=orgs)
+    return evolve(model, organizations=org_mapping)
