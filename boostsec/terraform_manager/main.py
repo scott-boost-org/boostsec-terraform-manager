@@ -91,8 +91,16 @@ def update(
     create_pr(
         file_content=formatted_result,
         branch_name=f"update-{workspace}-{feature_flag}",
-        commit_msg=f"Add {feature_flag} to all orgs in the {workspace} environment",
-        pr_title=f"[{workspace.upper()}] Update orgs with feature flag: {feature_flag}",
+        commit_msg=(
+            f"Add {feature_flag} to "
+            f"{'all orgs' if not org_list else orgs} "
+            f"in the {workspace} environment"
+        ),
+        pr_title=(
+            f"[{workspace.upper()}] "
+            f"Update {'orgs' if not org_list else orgs} "
+            f"with feature flag: {feature_flag}"
+        ),
         token=gh_api_token,
         workspace=workspace,
     )
