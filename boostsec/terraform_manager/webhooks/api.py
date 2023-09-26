@@ -1,4 +1,5 @@
 """Webhooks API."""
+import hmac
 import shlex
 import urllib.parse
 from typing import Any, Optional
@@ -76,9 +77,39 @@ async def slash_command(
     request: Request,
 ) -> dict[str, Any]:
     """Handle slash command webhook from slack."""
-    response: dict[str, Any] = {"blocks": [], "response_type": "in_channel"}
     settings: ApiWebhooksSettings = app.state.settings
-    urlstring = (await request.body()).decode()
+    response: dict[str, Any] = {"blocks": [], "response_type": "in_channel"}
+
+    request_timestamp = request.headers["X-Slack-Request-Timestamp"]
+    request_body = await request.body()
+    base_secret = ":".join(
+        [
+            "v0",
+            request_timestamp,
+            request_body.decode(),
+        ]
+    )
+    computed_secret = hmac.new(
+        key=settings.slack_signing_secret.encode(),
+        msg=base_secret.encode(),
+        digestmod="sha256",
+    ).hexdigest()
+    if not hmac.compare_digest(
+        f"v0={computed_secret}", request.headers["X-Slack-Signature"]
+    ):
+        response["response_type"] = "ephemeral"
+        response["blocks"].append(
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "Failed to verify.",
+                },
+            }
+        )
+        return response
+
+    urlstring = request_body.decode()
     command_payload = SlashCommandPayload.from_urlstring(urlstring)
     if command_payload.channel_name == "directmessage":
         response["response_type"] = "ephemeral"
