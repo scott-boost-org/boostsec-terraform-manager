@@ -1,8 +1,9 @@
 name: SBOM
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+#  push:
+#    branches:
+#      - main
 jobs:
   sbom:
     name: Generate and store artifact
