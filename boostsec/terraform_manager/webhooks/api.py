@@ -6,7 +6,7 @@ from typing import Any, Optional
 
 import structlog
 from fastapi import APIRouter, FastAPI
-from github import Github
+from github import Github, UnknownObjectException
 from github.Repository import Repository
 from pydantic import BaseModel
 from starlette.requests import Request
@@ -72,13 +72,31 @@ def to_inputs(text: str) -> dict[str, Any]:
     return result
 
 
+def _build_response(
+    is_ok: bool, msgs: list[str], response_type: str = "in_channel"
+) -> dict[str, Any]:
+    blocks = [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": msg,
+            },
+        }
+        for msg in msgs
+    ]
+    return {
+        "attachments": [{"color": "#2eb67d" if is_ok else "#e01e5a", "blocks": blocks}],
+        "response_type": response_type,
+    }
+
+
 @router.post("/terraform-manager-webhooks/slash-command")
 async def slash_command(
     request: Request,
 ) -> dict[str, Any]:
     """Handle slash command webhook from slack."""
     settings: ApiWebhooksSettings = app.state.settings
-    response: dict[str, Any] = {"blocks": [], "response_type": "in_channel"}
 
     request_timestamp = request.headers["X-Slack-Request-Timestamp"]
     request_body = await request.body()
@@ -97,118 +115,83 @@ async def slash_command(
     if not hmac.compare_digest(
         f"v0={computed_secret}", request.headers["X-Slack-Signature"]
     ):
-        response["response_type"] = "ephemeral"
-        response["blocks"].append(
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "Failed to verify.",
-                },
-            }
-        )
-        return response
+        return _build_response(False, ["Failed to verify signature"], "ephemeral")
 
     urlstring = request_body.decode()
     command_payload = SlashCommandPayload.from_urlstring(urlstring)
     if command_payload.channel_name == "directmessage":
-        response["response_type"] = "ephemeral"
-        response["blocks"].append(
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": (
-                        "Sorry this bot cannot be triggered inside a direct message."
-                    ),
-                },
-            }
+        return _build_response(
+            False,
+            ["Sorry this bot cannot be triggered inside a direct message."],
+            "ephemeral",
         )
-        return response
     command_text = command_payload.text
     if command_text == "help":
-        response["response_type"] = "ephemeral"
-        response["blocks"].extend(
+        return _build_response(
+            True,
             [
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": (
-                            "```/gh-action repo-full-path=org/repo "
-                            "workflow-id=myWorkflow.yml name=Scott```"
-                        ),
-                    },
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": (
-                            "`repo-full-path`: Full path to the repository "
-                            "where the workflow is located in."
-                        ),
-                    },
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": (
-                            "`workflow-id`: Name of workflow file to be triggered."
-                        ),
-                    },
-                },
-            ]
+                "```/gh-actions repo-full-path=org/repo "
+                "workflow-id=myWorkflow.yml name=Scott```",
+                "`repo-full-path`: Full path to the repository "
+                "where the workflow is located in.",
+                "`workflow-id`: Name of workflow file to be triggered.",
+            ],
+            "ephemeral",
         )
-        return response
     try:
         inputs = to_inputs(command_text)
     except ValueError:
-        response["blocks"].append(
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "All arguments must be of the form name=value.",
-                },
-            }
+        return _build_response(
+            False,
+            [
+                "All arguments must be of the form `name=value`",
+            ],
+            "in_channel",
         )
-        return response
     try:
         repo_full_path = inputs.pop("repo-full-path")
         workflow_id = inputs.pop("workflow-id")
     except KeyError as e:
-        response["blocks"].append(
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"Missing kwarg: `{e.args[0]}`",
-                },
-            }
+        return _build_response(
+            False,
+            [
+                f"Missing kwarg: `{e.args[0]}`",
+            ],
+            "in_channel",
         )
-        return response
-
-    repo = _get_repo(settings.github_token, repo_full_path)
-    workflow = repo.get_workflow(workflow_id)
+    try:
+        repo = _get_repo(settings.github_token, repo_full_path)
+    except UnknownObjectException:
+        return _build_response(
+            False,
+            [
+                f"Cannot access repo: `{repo_full_path}`",
+            ],
+            "in_channel",
+        )
+    try:
+        workflow = repo.get_workflow(workflow_id)
+    except UnknownObjectException:
+        return _build_response(
+            False,
+            [
+                f"Cannot find workflow: `{workflow_id}`",
+            ],
+            "in_channel",
+        )
     success = workflow.create_dispatch(
         repo.default_branch,
         inputs,
     )
     if success:
-        response["blocks"].append(
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": (
-                        "Successfully dispatched workflow "
-                        f"`{workflow_id}` in repository "
-                        f"`{repo_full_path}` with kwargs: {inputs}"
-                    ),
-                },
-            }
+        return _build_response(
+            True,
+            [
+                "Successfully dispatched workflow "
+                f"`{workflow_id}` in repository "
+                f"`{repo_full_path}` with kwargs: {inputs}",
+            ],
+            "in_channel",
         )
     else:
         url = (
@@ -216,20 +199,15 @@ async def slash_command(
             f"{repo_full_path}/blob/{repo.default_branch}/"
             f".github/workflows/{workflow_id}"
         )
-        response["blocks"].append(
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": (
-                        "Workflow dispatch failed. "
-                        "Probably missing required inputs. "
-                        f"Please check {url}"
-                    ),
-                },
-            }
+        return _build_response(
+            True,
+            [
+                "Workflow dispatch failed. "
+                "Probably missing required inputs. "
+                f"Please check {url}"
+            ],
+            "in_channel",
         )
-    return response
 
 
 def create_app(
